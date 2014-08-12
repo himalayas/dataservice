@@ -1,0 +1,17 @@
+# Created by .gitignore support plugin (hsz.mobi)
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.ipr
+*.iws
+.dep.inc
+*.pyc
+.idea/
+.svn/
+.git/
+.settings/
+.classpath
+nbproject/
+target/
