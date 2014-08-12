@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                     http://www.springframework.org/schema/beans/spring-beans-3.2.xsd"
+				default-autowire="byName">
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="order" value="1"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="locations">
+            <list>
+                <value>${configure_file}</value>
+            </list>
+        </property>
+        <property name="fileEncoding">
+            <value>utf-8</value>
+        </property>
+    </bean>
+<!--    <bean id="globalDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>java:/comp/env/jdbc/mysqlDataSource</value>
+		</property>
+	</bean>-->
+    <bean id="globalDataSource" class="org.apache.tomcat.dbcp.dbcp2.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${givr_db_driver}"/>
+        <property name="url" value="${givr_db_url}"/>
+        <property name="username" value="${givr_db_username}"/>
+        <property name="password" value="${givr_db_password}"/>
+        <property name="initialSize" value="50"/>
+        <!--<property name="maxActive" value="100"/>-->
+        <property name="maxIdle" value="20"/>
+        <!--<property name="maxWait" value="30"/>-->
+    </bean>
+    <bean id="globalSqlMapClient" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation" value="${givr_db_sqlmap}"/>
+        <property name="dataSource" ref="globalDataSource" />
+	</bean>
+    <bean id="cassandraSession" class="com.webex.dataservice.util.CassandraSessionFactory">
+        <constructor-arg name="nodes" value="${givr_kv_nodes}"/>
+    </bean>
+</beans>

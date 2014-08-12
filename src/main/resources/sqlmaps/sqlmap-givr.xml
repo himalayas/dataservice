@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ivr">
+    <select id="selectMaccIndexByAccessCode" parameterType="string"
+            resultType="com.webex.dataservice.service.dos.MaccdomainDO">
+        <![CDATA[
+SELECT ta.maccdomainindexid,ta.maccdomainindex,TB.MACCDOMAINNAME as primaryvip,tc.MACCDOMAINNAME as backupvip,ta.priority from
+                (SELECT td.domainid,
+                       DECODE (
+                                 tz.maxphonelines,
+                                 1, DECODE (tz.primary,
+                                            1, 1,
+                                            2, 2,
+                                            4, 3),
+                                 0, DECODE (tz.primary,
+                                            1, 4,
+                                            2, 5,
+                                            4, 6)) as priority,
+                       mdi.*
+                  FROM wbxcalendar ca,
+                       wbxsitetelephonydomain std,
+                       wbxtelephonydomain td,
+                       wbxtelephonyzone tz,
+                       wbxtelephonydomainconfig cfg,
+                       WBXTELEMACCDOMAININDEX mdi
+                 WHERE    ca.CONFKEY = #{accessCode}
+                       AND std.siteid = ca.siteid
+                       AND std.domainid = td.domainid
+                       AND td.domainid = tz.domainid
+                       AND tz.maxphonelines IN (1, 0)
+                       AND tz.active = 1
+                       AND tz.domainid = cfg.domainid
+                       AND cfg.itemname =
+                              DECODE (
+                                 tz.maxphonelines,
+                                 1, DECODE (tz.primary,
+                                            1, 'MACCDomainIndexIDP1',
+                                            2, 'MACCDomainIndexIDP1B1',
+                                            4, 'MACCDomainIndexIDP1B2'),
+                                 0, DECODE (tz.primary,
+                                            1, 'MACCDomainIndexIDP2',
+                                            2, 'MACCDomainIndexIDP2B1',
+                                            4, 'MACCDomainIndexIDP2B2'))
+                       AND cfg.itemvalue = mdi.MACCDOMAININDEXID) ta, WBXTELEMACCDOMAIN tb, WBXTELEMACCDOMAIN tc
+WHERE ta.primarymaccdomainid=tb.maccdomainid(+)
+AND ta.backupmaccdomainid=tc.maccdomainid(+)
+        ]]>
+</select>
+</mapper>
